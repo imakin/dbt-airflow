@@ -1,0 +1,16 @@
+dbt_nyc_taxi:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: /opt/airflow/data/dwib.duckdb
+      schema: analytics
+      threads: 4
+
+    prod:
+      type: duckdb
+      path: /opt/airflow/data/dwib_taxi_prod.duckdb
+      schema: analytics
+      threads: 4
+
+  target: dev

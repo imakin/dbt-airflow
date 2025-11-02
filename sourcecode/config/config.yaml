@@ -1,0 +1,26 @@
+paths:
+  # folder untuk source .parquet & .csv
+  raw: data/raw
+  # karena DBT, semua pakai satu database
+  db_path: data/dwib.duckdb
+
+
+sources:
+  urls:
+    zone_lookup: https://d37ci6vzurychx.cloudfront.net/misc/taxi+_zone_lookup.csv
+    trip_record_format: https://d37ci6vzurychx.cloudfront.net/trip-data/{}_tripdata_{}.parquet
+  vehicles:
+    yellow: yellow taxi
+    # hanya Yellow Taxi Data
+    # green: green taxi
+    # fhv: for-hire vehicle
+    # fhvhv: high volume for-hire vehicle
+
+# simulasi tanggal sesuai perintah soal
+simulation:
+  start_date: 2023-01-01
+  end_date: 2023-03-31
+
+logger:
+  log_file: logs/system.log
+  error_log_file: logs/error.log

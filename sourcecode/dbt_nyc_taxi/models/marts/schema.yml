@@ -1,0 +1,121 @@
+version: 2
+
+models:
+  - name: dim_zones
+    description: "Dimension table for NYC Taxi Zones with borough hierarchy"
+    
+    columns:
+      - name: location_id
+        description: "Primary key for taxi zone"
+        tests:
+          - unique
+          - not_null
+      
+      - name: zone_name
+        description: "Name of the taxi zone"
+        tests:
+          - not_null
+      
+      - name: borough
+        description: "NYC borough"
+        tests:
+          - not_null
+      
+      - name: borough_sort_order
+        description: "Numeric sort order for boroughs"
+
+  - name: fct_trips
+    description: "Fact table containing all valid NYC taxi trips with dimensions and measures"
+    
+    columns:
+      - name: trip_id
+        description: "Unique identifier for each trip"
+        tests:
+          - unique
+          - not_null
+      
+      - name: pickup_location_id
+        description: "Foreign key to dim_zones (pickup location)"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_zones')
+              field: location_id
+      
+      - name: payment_type
+        description: "Payment method (1=Credit card, 2=Cash)"
+        tests:
+          - not_null
+      
+      - name: pickup_datetime
+        description: "Timestamp when trip started"
+        tests:
+          - not_null
+      
+      - name: trip_date
+        description: "Date of trip"
+        tests:
+          - not_null
+      
+      - name: pickup_hour
+        description: "Hour when trip started (0-23)"
+        tests:
+          - not_null
+      
+      - name: pickup_borough
+        description: "Borough where trip started"
+      
+      - name: trip_type
+        description: "Trip classification: Intra-Borough, Inter-Borough, or Airport"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Intra-Borough', 'Inter-Borough', 'Airport']
+      
+      - name: trip_duration_minutes
+        description: "Trip duration in minutes"
+        tests:
+          - not_null
+      
+      - name: average_speed_mph
+        description: "Average speed in miles per hour"
+      
+      - name: total_amount
+        description: "Total revenue for trip"
+        tests:
+          - not_null
+
+  - name: agg_daily_stats
+    description: "Pre-aggregated daily statistics with moving averages"
+    
+    columns:
+      - name: trip_date
+        description: "Date dimension"
+        tests:
+          - unique
+          - not_null
+      
+      - name: total_trips
+        description: "Total trips on this date"
+        tests:
+          - not_null
+      
+      - name: total_revenue
+        description: "Sum of all trip revenue"
+        tests:
+          - not_null
+      
+      - name: avg_revenue_per_trip
+        description: "Average revenue per trip"
+      
+      - name: credit_card_trips
+        description: "Number of credit card payments"
+      
+      - name: cash_trips
+        description: "Number of cash payments"
+      
+      - name: trips_7day_ma
+        description: "7-day moving average of trips"
+      
+      - name: revenue_7day_ma
+        description: "7-day moving average of revenue"

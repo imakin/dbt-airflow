@@ -1,0 +1,110 @@
+version: 2
+
+models:
+  - name: int_trips_enhanced
+    description: >
+      Enhanced trip data with calculated metrics (duration, speed), 
+      geographic enrichment (pickup borough), 
+      trip type classification (Intra-Borough, Inter-Borough, Airport),
+      and time dimensions (hour, date).
+      
+      This model serves as the foundation for fact tables and aggregations.
+    
+    columns:
+      - name: trip_id
+        description: "Surrogate key (MD5 hash of natural key columns)"
+        tests:
+          - unique
+          - not_null
+      
+      - name: pickup_location_id
+        description: "Location ID where trip started"
+        tests:
+          - not_null
+      
+      - name: payment_type
+        description: "Payment method (1=Credit card, 2=Cash, etc.)"
+        tests:
+          - not_null
+      
+      - name: total_amount
+        description: "Total revenue for the trip"
+        tests:
+          - not_null
+      
+      - name: pickup_datetime
+        description: "Timestamp when trip started"
+        tests:
+          - not_null
+      
+      - name: pickup_borough
+        description: "Borough name where trip started (from taxi zone lookup)"
+      
+      - name: trip_duration_minutes
+        description: "Trip duration calculated from dropoff_datetime - pickup_datetime in minutes"
+        tests:
+          - not_null
+      
+      - name: average_speed_mph
+        description: "Average speed calculated as (trip_distance / trip_duration_hours). NULL if duration is 0."
+      
+      - name: trip_type
+        description: >
+          Trip classification based on pickup and dropoff locations:
+          - 'Intra-Borough': Same borough pickup and dropoff
+          - 'Inter-Borough': Different boroughs
+          - 'Airport': Either pickup or dropoff is EWR (Newark Airport)
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Intra-Borough', 'Inter-Borough', 'Airport']
+      
+      - name: pickup_hour
+        description: "Hour of day (0-23) when trip started"
+        tests:
+          - not_null
+      
+      - name: trip_date
+        description: "Date portion of pickup_datetime (for grouping and joining)"
+        tests:
+          - not_null
+
+  - name: int_daily_metrics
+    description: >
+      Daily aggregated metrics with trip counts, revenue totals, averages,
+      payment method distributions, and moving averages (7-day)
+      for trend analysis.
+      
+      This model is optimized for time-series analysis and dashboard KPIs.
+    
+    columns:
+      - name: trip_date
+        description: "Date dimension (primary key for daily aggregation)"
+        tests:
+          - unique
+          - not_null
+      
+      - name: total_trips
+        description: "Total number of trips on this date"
+        tests:
+          - not_null
+      
+      - name: total_revenue
+        description: "Sum of all total_amount for the day"
+        tests:
+          - not_null
+      
+      - name: avg_revenue_per_trip
+        description: "Average revenue per trip (total_revenue / total_trips)"
+      
+      - name: credit_card_trips
+        description: "Number of trips paid by credit card (payment_type=1)"
+      
+      - name: cash_trips
+        description: "Number of trips paid by cash (payment_type=2)"
+      
+      - name: trips_7day_ma
+        description: "7-day moving average of total_trips (for trend smoothing)"
+      
+      - name: revenue_7day_ma
+        description: "7-day moving average of total_revenue"

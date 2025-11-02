@@ -1,0 +1,9 @@
+# untuk Dataframe, olah csv dan parquet
+pandas>=2.0,<2.3
+# config pakai yaml, lebih mudah dibaca daripada json
+PyYAML>=6.0
+# database
+duckdb
+dbt-duckdb
+# parquet, pandas/duckdb juga bisa tapi pyarrow lebih efisien. misal baca column saja
+pyarrow

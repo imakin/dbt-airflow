@@ -1,0 +1,113 @@
+x-airflow-common: &airflow-common
+  image: airflow-custom:2.9.-python.12
+  build:
+    context: .
+    dockerfile: Dockerfile
+  environment: &airflow-env
+    # SQLite SequentialExecutor, parallel pakai LocalExecuter perlu Postgres
+    AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+    # SECRET dan FERNET di file .env, wajib diganti
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+
+    # bisa override di .env, default smtp ke container dwib-uas-mailhog
+    AIRFLOW__SMTP__SMTP_HOST: ${AIRFLOW__SMTP__SMTP_HOST:-dwib-uas-mailhog}
+    AIRFLOW__SMTP__SMTP_STARTTLS: ${AIRFLOW__SMTP__SMTP_STARTTLS:-False}
+    AIRFLOW__SMTP__SMTP_SSL: ${AIRFLOW__SMTP__SMTP_SSL:-False}
+    AIRFLOW__SMTP__SMTP_USER: ${AIRFLOW__SMTP__SMTP_USER:-makin@mailhog.com}
+    AIRFLOW__SMTP__SMTP_PASSWORD: ${AIRFLOW__SMTP__SMTP_PASSWORD:-smtppassword}
+    AIRFLOW__SMTP__SMTP_PORT: ${AIRFLOW__SMTP__SMTP_PORT:-1025}
+    AIRFLOW__SMTP__SMTP_MAIL_FROM: ${AIRFLOW__SMTP__SMTP_MAIL_FROM:-makin@mailhog.com}
+
+    PYTHONPATH: /opt/airflow
+  # mount
+  volumes:
+    - ./:/opt/airflow
+    - ./config/dbt:/home/airflow/.dbt
+  # Set user for all services (except airflow-init which needs root)
+  user: "50000:${AIRFLOW_GUID}"
+
+services:
+  dwib-uas-init:
+    <<: *airflow-common
+    container_name: dwib-uas-initscript
+    user: "0:0" # pakai user root, supaya bisa mkdir/chown/chmod
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        set -e
+        # buat group 1000, agar sama dengan gid user di host saya
+        groupadd -g ${AIRFLOW_GUID} hostgroup || true
+        # jadikan user airflowuser anggota gid 1000
+        useradd -u 50000 -g ${AIRFLOW_GUID} -M airflowuser || true
+        # user airflow (uid 50000) harus bisa tulis di mounted volume ini
+        mkdir -p /opt/airflow/logs /opt/airflow/dags /opt/airflow/data
+        chown -R 50000:${AIRFLOW_GUID} /opt/airflow || true
+        chmod -R g+rwX /opt/airflow || true
+        airflow db migrate
+        chown 50000:${AIRFLOW_GUID} /opt/airflow/airflow.db || true
+        chmod 664 /opt/airflow/airflow.db || true
+        airflow users create \
+          --username ${AIRFLOW_WEB_USER} \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email ${AIRFLOW_WEB_USER}@freemock.com \
+          --password ${AIRFLOW_WEB_PASSWORD}
+    restart: "no"
+
+  dwib-uas-webserver:
+    <<: *airflow-common
+    container_name: dwib-uas-webserver
+    ports:
+      - "${AIRFLOW_WEB_PORT:-8080}:8080"
+    environment:
+      <<: *airflow-env
+      AIRFLOW__WEBSERVER__WEB_SERVER_PID: /opt/airflow/logs/dwib-uas-webserver.pid
+      TMPDIR: /tmp
+    command: airflow webserver
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8081/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      dwib-uas-init:
+        condition: service_completed_successfully
+
+  dwib-uas-scheduler:
+    container_name: dwib-uas-scheduler
+    <<: *airflow-common
+    environment:
+      <<: *airflow-env
+      TMPDIR: /tmp
+    command: airflow scheduler
+    depends_on:
+      dwib-uas-init:
+        condition: service_completed_successfully
+
+  dwib-uas-permission-fixer:
+    <<: *airflow-common
+    container_name: dwib-uas-permission-fixer
+    user: "0:0" # root untuk chown chmod
+    environment:
+      <<: *airflow-env
+      TMPDIR: /tmp
+    entrypoint: /bin/bash
+    command: /opt/airflow/dags/scripts/fix-log-permission.sh
+    # restart: unless-stopped
+
+  dwib-uas-mailhog:
+    image: mailhog/mailhog:latest
+    container_name: dwib-uas-mailhog
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8025 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
