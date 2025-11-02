@@ -20,14 +20,8 @@ dbt run
 dbt test
 dbt docs generate
 ```
-Document server tidak saya forward ke-host. Sebagai gantinya bisa buka terminal pada host
-```
-# terminal host (bukan docker)
-# sesuaikan  path bila perlu, sesuaikan port server bila perlu
-cd sourcecode/dbt_nyc_taxi/target
-python -m http.server 8080
-```
-sehingga bisa buka di port tersbut
+Document server telah di forward dari docker ke host di port 8083 dengan `python -m http.server`,
+jadi bisa dibuka disitu http://127.0.0.1:8083 (tidak perlu jalankan `dbt docs serve`)
 
 # Bila ingin menjalankan manual tanpa airflow:
 

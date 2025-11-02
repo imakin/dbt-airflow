@@ -1,16 +1,22 @@
 ## Intro
 semua proses berjalan di dalam docker.
-sudah ada service untuk airflow dan mailhog.
+sudah ada service untuk
+
+- airflow dashboard http://127.0.0.1:8081
+- mailhog http://127.0.0.1:8025
+- dokumentasi model hasil DBT http://127.0.0.1:8083
+- dashboard visualisasi http:127.0.0.1:8082
+
 Secara default email dikirim ke mailhog, bila ingin pakai smtp google bisa atur
-di `.env`.
+di `.env`
 
 ## prerequisite
 Sudah install docker terbaru (sudah support docker compose)
-kosongkan port 8081, 8025, 1025, atau atur di .env/docker-compose.yaml untuk pakai port lain
+kosongkan port 8081, 8082, 8025, 1025, atau atur di `.env` atau `docker-compose.yaml` untuk pakai port lain
 
 ## how to run
 1. buka terminal (bash/zsh/cmd/ps dll) masuk ke folder sourcecode
-2. buat file `.env` untuk override pengaturan lewat environment variable 
+2. buat file `sourcecode/.env` untuk override pengaturan lewat environment variable  contoh
 
         # sourcecode/.env
 
@@ -49,4 +55,7 @@ kosongkan port 8081, 8025, 1025, atau atur di .env/docker-compose.yaml untuk pak
     - `docker exec -it dwib-uas-scheduler bash`
     - `cd /opt/airflow`
     - `source simulate.sh`
+
+8. Bila pipeline sudah dijalankan, dapat mengakses dokumentasi model di 127.0.0.1:8083
+8. Bila pipeline sudah dijalankan, dapat mengakses Visualisasi Data di 127.0.0.1:8082
 

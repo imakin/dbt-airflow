@@ -63,17 +63,12 @@ services:
     <<: *airflow-common
     container_name: dwib-uas-webserver
     ports:
-      - "${AIRFLOW_WEB_PORT:-8080}:8080"
+      - "${AIRFLOW_WEB_PORT:-8081}:8080"
     environment:
       <<: *airflow-env
       AIRFLOW__WEBSERVER__WEB_SERVER_PID: /opt/airflow/logs/dwib-uas-webserver.pid
       TMPDIR: /tmp
     command: airflow webserver
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8081/health || exit 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
     depends_on:
       dwib-uas-init:
         condition: service_completed_successfully
@@ -99,6 +94,19 @@ services:
     entrypoint: /bin/bash
     command: /opt/airflow/dags/scripts/fix-log-permission.sh
     # restart: unless-stopped
+
+  dwib-uas-dashboard:
+    <<: *airflow-common
+    container_name: dwib-uas-dashboard
+    ports:
+      - "${VISUALIZATION_PORT:-8082}:8082"
+      - "8083:8083"
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        streamlit run /opt/airflow/visualization.py --server.headless true --server.port 8082 --server.address 0.0.0.0 &
+        cd /opt/airflow/dbt_nyc_taxi/target && python -m http.server 8083
 
   dwib-uas-mailhog:
     image: mailhog/mailhog:latest

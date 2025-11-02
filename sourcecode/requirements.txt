@@ -7,3 +7,7 @@ duckdb
 dbt-duckdb
 # parquet, pandas/duckdb juga bisa tapi pyarrow lebih efisien. misal baca column saja
 pyarrow
+
+# untuk dashboard.py
+streamlit
+plotly
