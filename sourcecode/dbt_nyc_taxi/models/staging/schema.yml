@@ -2,27 +2,8 @@ version: 2
 models:
   - name: stg_taxi_trips
     description: "Staging table untuk NYC (Yellow) taxi trips data"
-    # vendor_id,
-    # tpep_pickup_datetime   as pickup_datetime,
-    # tpep_dropoff_datetime  as dropoff_datetime,
-    # passenger_count,
-    # trip_distance,
-    # ratecodeid as rate_code_id,
-    # store_and_fwd_flag,
-    # pulocationid as pickup_location_id,
-    # dolocationid as dropoff_location_id,
-    # payment_type,
-    # fare_amount,
-    # extra,
-    # mta_tax,
-    # tip_amount,
-    # tolls_amount,
-    # improvement_surcharge,
-    # total_amount,
-    # congestion_surcharge,
-    # airport_fee
-    
-    # https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf
+
+    # referensi info https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf
     columns:
       - name: trip_id
         description: "Unique key generated from MD5 hash of natural key columns (vendorid, pickup_datetime, dropoff_datetime, pickup_location_id, dropoff_location_id)"

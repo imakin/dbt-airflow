@@ -11,7 +11,7 @@ source_data as (
         *
     from
         {{ source('raw', 'taxi_zone_lookup') }}
-    -- bila pakai dbt seed  {{ ref('taxi_zone_lookup) }}
+    -- bila pakai dbt seed  {{ ref('taxi_zone_lookup') }}
 ),
 
 -- LocationID        Borough                     Zone service_zone
