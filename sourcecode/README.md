@@ -12,7 +12,7 @@ di `.env`
 
 ## prerequisite
 Sudah install docker terbaru (sudah support docker compose)
-kosongkan port 8081, 8082, 8025, 1025, atau atur di `.env` atau `docker-compose.yaml` untuk pakai port lain
+kosongkan port 8081, 8082, 8083, 8025, 1025, atau atur di `.env` atau `docker-compose.yaml` untuk pakai port lain
 
 ## how to run
 1. buka terminal (bash/zsh/cmd/ps dll) masuk ke folder sourcecode

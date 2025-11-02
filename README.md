@@ -6,23 +6,80 @@ Dikerjakan sebagai UAS / Proyek Akhir ke2 DWIB
 
 Oleh: Muhammad Ramdan Izzulmakin (551362)
 
-Pembuatan datamart dari new york city taxi https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page.
-Pembuatan datamart menggunakan DBT (data build tools). Dijalankan dengan pipeline/scheduler Apache Airflow.
-Semua dijalankan didalam docker (Airflow, DBT, Mailhog untuk test email).
+- Ini adalah pembuatan datamart dengan data dari new york city taxi https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page.
+- Pembuatan datamart menggunakan DBT (data build tools). Dijalankan dengan pipeline/scheduler Apache Airflow.
+- Semua dijalankan didalam docker (Airflow, DBT, Mailhog untuk test email, visualization).
+
+## Catatan
+### Ada 3 README.md:
+- file ini
+- sourcecode/README.md
+- sourcecode/dbt_nyc_taxi/README.md
+### Projek berjalan di docker, cara setup ada di sourcecode/README.md
+### Bila docker dijalankan, maka dapat membuka dashboard berikut:
+
+- airflow dashboard http://127.0.0.1:8081
+- mailhog http://127.0.0.1:8025
+- dokumentasi model hasil DBT http://127.0.0.1:8083
+- dashboard visualisasi http://127.0.0.1:8082
+
+
+---
+
 
 # 3.1 Apache Airflow
 
-- 3 files python DAG: [sourcecode/dags](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dags)
+- ### 3 files python DAG: [sourcecode/dags](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dags)
   
   - sourcecode/dags/nyc_taxi_ingestion.py
   - sourcecode/dags/nyc_taxi_transform.py
   - sourcecode/dags/nyc_taxi_monitor.py
 
-- Docker compose: [sourcecode/docker-compose.yaml](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/docker-compose.yaml), [sourcecode/Dockerfile](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/Dockerfile)
+- ### Docker compose: [sourcecode/docker-compose.yaml](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/docker-compose.yaml), [sourcecode/Dockerfile](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/Dockerfile)
 
-- Screenshots
+- ### Screenshots
+    - #### graph view
+        - nyc_taxi_ingestion
+        
+        ![Airflow Graph ingestion](screenshots/airflow-graph-nyc_taxi_ingestion.webp)
 
-- Readme setup: [sourcecode/README.md](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/README.md)
+        - nyc_taxi_transform
+        
+        ![Airflow Graph transform](screenshots/airflow-graph-nyc_taxi_transform.webp)
+
+        - nyc_taxi_monitor
+        
+        ![Airflow Graph Monitor](screenshots/airflow-graph-nyc_taxi_monitor.webp)
+
+
+    - #### task runs
+
+        ![Airflow task runs](screenshots/airflow_dags.webp)
+
+    - #### logs 
+
+        ![Airflow logs 1](screenshots/airflow-logs4.webp)
+
+    - #### gantt chart
+
+        - nyc_taxi_ingestion
+
+        ![Airflow Gantt ingestion](screenshots/airflow-gantt-nyc_taxi_ingestion.webp)
+
+        - nyc_taxi_transform
+
+        ![Airflow Gantt transform](screenshots/airflow-gantt-nyc_taxi_transform.webp)
+
+        - nyc_taxi_monitor
+
+        ![Airflow Gantt monitor](screenshots/airflow-gantt-nyc_taxi_monitor.webp)
+    
+    - #### Notification/email
+
+        ![Airflow email](screenshots/airflow-email.png)
+
+
+- ### Readme setup dapat dibaca di: [sourcecode/README.md](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/README.md). Kode markdown: 
   
         ## Intro
         semua proses berjalan di dalam docker.
@@ -38,7 +95,7 @@ Semua dijalankan didalam docker (Airflow, DBT, Mailhog untuk test email).
 
         ## prerequisite
         Sudah install docker terbaru (sudah support docker compose)
-        kosongkan port 8081, 8082, 8025, 1025, atau atur di `.env` atau `docker-compose.yaml` untuk pakai port lain
+        kosongkan port 8081, 8082, 8083, 8025, 1025, atau atur di `.env` atau `docker-compose.yaml` untuk pakai port lain
 
         ## how to run
         1. buka terminal (bash/zsh/cmd/ps dll) masuk ke folder sourcecode
@@ -89,9 +146,9 @@ Semua dijalankan didalam docker (Airflow, DBT, Mailhog untuk test email).
 
 # 3.2 Data Build Tool
 
-- Complete DBT project: [sourcecode/dbt_nyc_taxi](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dbt_nyc_taxi)
+- ### Complete DBT project: [sourcecode/dbt_nyc_taxi](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dbt_nyc_taxi)
 
-- Semua SQL models: [sourcecode/dbt_nyc_taxi/models](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dbt_nyc_taxi/models)
+- ### Semua SQL models: [sourcecode/dbt_nyc_taxi/models](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dbt_nyc_taxi/models)
   
   - sourcecode/dbt_nyc_taxi/models/staging/stg_taxi_trips.sql
   - sourcecode/dbt_nyc_taxi/models/staging/stg_taxi_zones.sql
@@ -101,17 +158,34 @@ Semua dijalankan didalam docker (Airflow, DBT, Mailhog untuk test email).
   - sourcecode/dbt_nyc_taxi/models/marts/fct_trips.sql
   - sourcecode/dbt_nyc_taxi/models/marts/agg_daily_stats.sql
 
-- Schema YAML dengan tests: [sourcecode/dbt_nyc_taxi/models](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dbt_nyc_taxi/models)
+- ### Schema YAML dengan tests, dengan comment untuk documentation: [sourcecode/dbt_nyc_taxi/models](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dbt_nyc_taxi/models)
   
   - sourcecode/dbt_nyc_taxi/models/staging/schema.yml
   - sourcecode/dbt_nyc_taxi/models/intermediate/schema.yml
   - sourcecode/dbt_nyc_taxi/models/marts/schema.yml
 
-- Generated docs (HTML): [sourcecode/dbt_nyc_taxi/target](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dbt_nyc_taxi/target)
+- ### Documentation / Generated docs (HTML) tersedia di: [sourcecode/dbt_nyc_taxi/target](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dbt_nyc_taxi/target). Bila menjalankan docker, dapat diakses di http://127.0.0.1:8083
 
-- Screenshots:
+- ### Screenshots:
 
-- README setup: [sourcecode/dbt_nyc_taxi/README.md](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dbt_nyc_taxi/README.md)
+    - #### dbt runs (screenshot ketika dijalankan manual tanpa airflow)
+
+        ![dbt runs](screenshots/dbt-run.webp)
+
+    - #### tests (screenshot ketika dijalankan manual tanpa airflow)
+
+        ![dbt test](screenshots/dbt-test.webp)
+
+    - #### lineage graph
+
+        ![dbt lineage](screenshots/dbt-lineage.webp)
+
+    - #### docs site
+
+        ![dbt doc](screenshots/dbt-docs2.webp)
+
+
+- ### README setup dibaca di: [sourcecode/dbt_nyc_taxi/README.md](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/dbt_nyc_taxi/README.md). Kode markdown:
   
         # Deskripsi
 
@@ -163,3 +237,20 @@ Semua dijalankan didalam docker (Airflow, DBT, Mailhog untuk test email).
             # untuk serve sourcecode/dbt_nyc_taxi/target ke local server
             dbt docs serve
             ```
+
+# 3.3 Visualisasi Data:
+
+### Visualisasi dapat dibuka di http://127.0.0.1:8082 (bila docker dijalankan dan task pembuatan datamart sudah dijalankan)
+### screenshot visualisasi
+
+![visualisasi](screenshots/vis.webp)
+
+# 4. Video ada di folder video-presentation/
+
+# 5. Tentang repo ini
+
+- ### Repo ini berisi semua code files (folder sourcecode/),
+- ### Sudah ada README.md dengan setup instructions (sourcecode/README.md dan sourecode/dbt_nyc_taxi/README.md)
+- ### repo ini berisi sourcecode/requirements.txt (dijalankan otomatis oleh pip install didalam docker ketika docker build)
+- ### repo ini berisi folder screenshots didalam screenshots/
+- ### repo ini berisi dokumentasi model data di sourcecode/dbt_nyc_taxi/target (http://127.0.0.1:8083)
