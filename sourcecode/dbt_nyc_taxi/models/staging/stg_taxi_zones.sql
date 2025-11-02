@@ -11,6 +11,7 @@ source_data as (
         *
     from
         {{ source('raw', 'taxi_zone_lookup') }}
+    -- bila pakai dbt seed  {{ ref('taxi_zone_lookup) }}
 ),
 
 -- LocationID        Borough                     Zone service_zone
@@ -21,6 +22,12 @@ renamed as (
         lower(borough)      as borough,
         lower(zone)         as zone,
         lower(service_zone) as service_zone
+
+        -- bila pakai dbt seed, nama kolom masih asli
+        -- "LocationID" as location_id,
+        -- lower("Borough")      as borough,
+        -- lower("Zone")         as zone,
+        -- lower("service_zone") as service_zone
     from
         source_data
 )

@@ -26,6 +26,11 @@ with DAG(
     catchup=False,
     tags=['datawarehouse', 'dbt'],
 ) as dag:
+    # Task 0 Bila pakai dbt seed untuk load taxi_zone_lookup.csv
+    # dbt_seed = BashOperator(
+    #     task_id='dbt_seed',
+    #     bash_command='cd /opt/airflow/dbt_nyc_taxi && dbt seed',
+    # )
     
     # Task 1: Run dbt models
     dbt_run = BashOperator(
@@ -60,4 +65,5 @@ with DAG(
     )
     
     # Dependencies
+    # dbt_seed >>
     dbt_run >> dbt_test >> dbt_docs >> send_notification
