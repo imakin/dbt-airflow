@@ -21,16 +21,11 @@ st.set_page_config(
 st.title("UAS DWIB")
 st.markdown("**3.3 Visualisasi Data NYC Taxi**")
 
-# Connect to database
-@st.cache_resource
-def get_connection():
-    return duckdb.connect(DB_PATH, read_only=True)
-
-conn = get_connection()
-
-# Load data with caching
+# semua load dengan caching dan semua langsung buka/tutup koneksi,
+# agar tidak mengunci db
 @st.cache_data
 def load_kpi_data():
+    conn = duckdb.connect(DB_PATH, read_only=True)
     query = f"""
     SELECT 
         SUM(total_trips) as total_trips,
@@ -38,20 +33,26 @@ def load_kpi_data():
         AVG(avg_revenue_per_trip) as avg_fare
     FROM {DB_SCHEMA}.{TABLE_AGG_DAILY_STATS}
     """
-    return conn.execute(query).fetchone()
+    result = conn.execute(query).fetchone()
+    conn.close()
+    return result
 
 @st.cache_data
 def load_trend_data():
+    conn = duckdb.connect(DB_PATH, read_only=True)
     query = f"""
     SELECT trip_date, total_trips, total_revenue
     FROM {DB_SCHEMA}.{TABLE_AGG_DAILY_STATS}
     WHERE trip_date >= '2023-01-01'
     ORDER BY trip_date
     """
-    return conn.execute(query).fetchdf()
+    result = conn.execute(query).fetchdf()
+    conn.close()
+    return result
 
 @st.cache_data
 def load_top_zones():
+    conn = duckdb.connect(DB_PATH, read_only=True)
     query = f"""
     SELECT 
         z.zone_name,
@@ -64,10 +65,13 @@ def load_top_zones():
     ORDER BY total_revenue DESC
     LIMIT 10
     """
-    return conn.execute(query).fetchdf()
+    result = conn.execute(query).fetchdf()
+    conn.close()
+    return result
 
 @st.cache_data
 def load_heatmap_data():
+    conn = duckdb.connect(DB_PATH, read_only=True)
     query = f"""
     SELECT 
         f.pickup_hour,
@@ -79,10 +83,13 @@ def load_heatmap_data():
     GROUP BY f.pickup_hour, z.borough
     ORDER BY f.pickup_hour, z.borough
     """
-    return conn.execute(query).fetchdf()
+    result = conn.execute(query).fetchdf()
+    conn.close()
+    return result
 
 @st.cache_data
 def load_payment_data():
+    conn = duckdb.connect(DB_PATH, read_only=True)
     query = f"""
     SELECT 
         CASE payment_type 
@@ -97,11 +104,18 @@ def load_payment_data():
     GROUP BY payment_type
     ORDER BY trip_count DESC
     """
-    return conn.execute(query).fetchdf()
+    result = conn.execute(query).fetchdf()
+    conn.close()
+    return result
+
+kpi_data = load_kpi_data()
+trend_df = load_trend_data()
+top_zones_df = load_top_zones()
+heatmap_df = load_heatmap_data()
+payment_df = load_payment_data()
 
 # 1. KPI Summary
 st.header("KPI Summary")
-kpi_data = load_kpi_data()
 total_trips, total_revenue, avg_fare = kpi_data
 
 col1, col2, col3 = st.columns(3)
@@ -116,7 +130,6 @@ st.markdown("---")
 
 # 2. Trend Analysis
 st.header("Trend Analysis")
-trend_df = load_trend_data()
 
 col1, col2 = st.columns(2)
 
@@ -146,7 +159,6 @@ st.markdown("---")
 
 # 3. Top Zones
 st.header("Top 10 Zones by Revenue")
-top_zones_df = load_top_zones()
 
 fig_zones = px.bar(
     top_zones_df,
@@ -166,7 +178,6 @@ st.markdown("---")
 
 # 4. Demand Heatmap
 st.header("Demand Heatmap - Trips by Hour and Borough")
-heatmap_df = load_heatmap_data()
 
 # Pivot for heatmap
 heatmap_pivot = heatmap_df.pivot(index='borough', columns='pickup_hour', values='trip_count')
@@ -186,8 +197,6 @@ st.markdown("---")
 
 # 5. Payment Breakdown
 st.header("Payment Method Breakdown")
-payment_df = load_payment_data()
-
 col1, col2 = st.columns([2, 1])
 
 with col1:
