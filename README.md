@@ -58,7 +58,7 @@ Oleh: Muhammad Ramdan Izzulmakin (551362)
 
     - #### logs 
 
-        ![Airflow logs 1](screenshots/airflow-logs4.webp)
+        ![Airflow logs 1](screenshots/airflow-logs-dbtrun.webp)
 
     - #### gantt chart
 
