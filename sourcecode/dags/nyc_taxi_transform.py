@@ -22,7 +22,7 @@ with DAG(
     description='dbt transformation',
     schedule='0 6 * * *',  # Daily at 6 AM
     start_date=utils.get_simulation_start_date(),
-    end_date=utils.get_simulation_end_date(),
+    end_date=None,  # Allow manual trigger anytime
     catchup=False,
     tags=['datawarehouse', 'dbt'],
 ) as dag:

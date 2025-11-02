@@ -27,7 +27,7 @@ with DAG(
     description='Monitor NYC Taxi data quality and anomalies',
     schedule_interval='0 */6 * * *',  # Every 6 hours
     start_date=utils.get_simulation_start_date(),
-    end_date=utils.get_simulation_end_date(),
+    end_date=None,
     catchup=False,  # trigger manual saja
     tags=['taxi', 'monitoring', 'datawarehouse'],
 ) as dag:
