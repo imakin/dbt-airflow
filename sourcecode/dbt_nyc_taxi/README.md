@@ -1,15 +1,56 @@
-Welcome to your new dbt project!
+# Deskripsi
 
-### Using the starter project
-
-Try running the following commands:
-- dbt run
-- dbt test
+Baca dulu [sourcecode/README.md](https://github.com/imakin/dbt-airflow/tree/main/sourcecode/README.md)
 
 
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+Folder project DBT ini sudah jadi dan akan di panggil di dalam task di apache airflow yang berjalan di project ini.
+Bila menggunakan docker (instruksi ../README.md) dbt akan terinstall di dalam docker.
+
+# Untuk mengakses dbt project ini di dalam docker
+
+buka terminal ke dalam docker (docker sudah jalan)
+```
+docker exec -it dwib-uas-scheduler bash
+```
+
+```
+# di dalam docker
+cd /opt/airflow/dbt_nyc_taxi
+dbt run
+dbt test
+dbt docs generate
+```
+Document server tidak saya forward ke-host. Sebagai gantinya bisa buka terminal pada host
+```
+# terminal host (bukan docker)
+# sesuaikan  path bila perlu, sesuaikan port server bila perlu
+cd sourcecode/dbt_nyc_taxi/target
+python -m http.server 8080
+```
+sehingga bisa buka di port tersbut
+
+# Bila ingin menjalankan manual tanpa airflow:
+
+1. Buat folder `.dbt`-nya di folder user bila belum ada, Kopi file `sourcecode/config/dbt/profiles.yml` ke:
+- Linux & MacOS: `~/.dbt/profiles.yml` (/home/namaakun/.dbt/)
+- Windows 11: `%USERPROFILE%\.dbt\profiles.yml` (C:/Users/NamaAkun/.dbt/profiles.yml)
+
+
+2. install requirements: **(NOTE: sesuaikan dengan posisi cwd terminal sekarang)** 
+
+    ```
+    # terminal host (bukan docker)
+    # sesuaikan path terhadap working directory terminal sekarang
+    cd sourcecode/dbt_nyc_taxi
+    pip install -r ../requirements.txt
+    ```
+
+3. jalankan dbt
+
+    ```
+    dbt run
+    dbt test
+    dbt docs generate
+    # untuk serve sourcecode/dbt_nyc_taxi/target ke local server
+    dbt docs serve
+    ```
