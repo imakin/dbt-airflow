@@ -2,7 +2,7 @@
 """Check progress from logs
 Because airflow web only shows last 3 days for 6hr interval tasks
 Only check from logs, queued task before its log created wont be shown
-@author: izzulmakin 2023
+@author: izzulmakin 2025
 """
 
 import sys

@@ -21,10 +21,38 @@ st.set_page_config(
 st.title("UAS DWIB")
 st.markdown("**3.3 Visualisasi Data NYC Taxi**")
 
+st.sidebar.header("Filter Options")
+
+# Min max date range
+min_date = "2023-01-01"
+max_date = "2025-12-31"
+
+# Date inputs
+start_date = st.sidebar.date_input(
+    "Start Date",
+    value=min_date,
+    min_value=min_date,
+    # max_value=max_date
+)
+
+end_date = st.sidebar.date_input(
+    "End Date",
+    value=max_date,
+    min_value=min_date,
+    # max_value=max_date
+)
+
+if start_date > end_date:
+    st.sidebar.error("End date harus setelah start date")
+    st.stop()
+
+# selected range
+st.sidebar.info(f"Range: {start_date} to {end_date}")
+
 # semua load dengan caching dan semua langsung buka/tutup koneksi,
 # agar tidak mengunci db
 @st.cache_data
-def load_kpi_data():
+def load_kpi_data(start_date, end_date):
     conn = duckdb.connect(DB_PATH, read_only=True)
     query = f"""
     SELECT 
@@ -32,18 +60,19 @@ def load_kpi_data():
         SUM(total_revenue) as total_revenue,
         AVG(avg_revenue_per_trip) as avg_fare
     FROM {DB_SCHEMA}.{TABLE_AGG_DAILY_STATS}
+    WHERE trip_date BETWEEN '{start_date}' AND '{end_date}'
     """
     result = conn.execute(query).fetchone()
     conn.close()
     return result
 
 @st.cache_data
-def load_trend_data():
+def load_trend_data(start_date, end_date):
     conn = duckdb.connect(DB_PATH, read_only=True)
     query = f"""
     SELECT trip_date, total_trips, total_revenue
     FROM {DB_SCHEMA}.{TABLE_AGG_DAILY_STATS}
-    WHERE trip_date >= '2023-01-01'
+    WHERE trip_date BETWEEN '{start_date}' AND '{end_date}'
     ORDER BY trip_date
     """
     result = conn.execute(query).fetchdf()
@@ -51,7 +80,7 @@ def load_trend_data():
     return result
 
 @st.cache_data
-def load_top_zones():
+def load_top_zones(start_date, end_date):
     conn = duckdb.connect(DB_PATH, read_only=True)
     query = f"""
     SELECT 
@@ -61,6 +90,7 @@ def load_top_zones():
         SUM(f.total_amount) as total_revenue
     FROM {DB_SCHEMA}.{TABLE_FCT_TRIPS} f
     JOIN {DB_SCHEMA}.{TABLE_DIM_ZONES} z ON f.pickup_location_id = z.location_id
+    WHERE f.trip_date BETWEEN '{start_date}' AND '{end_date}'
     GROUP BY z.zone_name, z.borough
     ORDER BY total_revenue DESC
     LIMIT 10
@@ -70,7 +100,7 @@ def load_top_zones():
     return result
 
 @st.cache_data
-def load_heatmap_data():
+def load_heatmap_data(start_date, end_date):
     conn = duckdb.connect(DB_PATH, read_only=True)
     query = f"""
     SELECT 
@@ -80,6 +110,7 @@ def load_heatmap_data():
     FROM {DB_SCHEMA}.{TABLE_FCT_TRIPS} f
     JOIN {DB_SCHEMA}.{TABLE_DIM_ZONES} z ON f.pickup_location_id = z.location_id
     WHERE z.borough != 'EWR'
+        AND f.trip_date BETWEEN '{start_date}' AND '{end_date}'
     GROUP BY f.pickup_hour, z.borough
     ORDER BY f.pickup_hour, z.borough
     """
@@ -88,7 +119,7 @@ def load_heatmap_data():
     return result
 
 @st.cache_data
-def load_payment_data():
+def load_payment_data(start_date, end_date):
     conn = duckdb.connect(DB_PATH, read_only=True)
     query = f"""
     SELECT 
@@ -101,6 +132,7 @@ def load_payment_data():
         END as payment_method,
         COUNT(*) as trip_count
     FROM {DB_SCHEMA}.{TABLE_FCT_TRIPS}
+    WHERE trip_date BETWEEN '{start_date}' AND '{end_date}'
     GROUP BY payment_type
     ORDER BY trip_count DESC
     """
@@ -108,11 +140,11 @@ def load_payment_data():
     conn.close()
     return result
 
-kpi_data = load_kpi_data()
-trend_df = load_trend_data()
-top_zones_df = load_top_zones()
-heatmap_df = load_heatmap_data()
-payment_df = load_payment_data()
+kpi_data = load_kpi_data(start_date, end_date)
+trend_df = load_trend_data(start_date, end_date)
+top_zones_df = load_top_zones(start_date, end_date)
+heatmap_df = load_heatmap_data(start_date, end_date)
+payment_df = load_payment_data(start_date, end_date)
 
 # 1. KPI Summary
 st.header("KPI Summary")
