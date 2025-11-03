@@ -1,0 +1,13 @@
+
+    
+    
+    
+    create table "dwib"."analytics"."taxi_zone_lookup" ("LocationID" integer,"Borough" text,"Zone" text,"service_zone" text)
+  ;
+    -- dbt seed --
+    
+          COPY "dwib"."analytics"."taxi_zone_lookup" FROM '/opt/airflow/dbt_nyc_taxi/seeds/taxi_zone_lookup.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
+        
+
+;
+  

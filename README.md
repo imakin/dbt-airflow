@@ -253,4 +253,4 @@ Oleh: Muhammad Ramdan Izzulmakin (551362)
 - ### Sudah ada README.md dengan setup instructions (sourcecode/README.md dan sourecode/dbt_nyc_taxi/README.md)
 - ### repo ini berisi sourcecode/requirements.txt (dijalankan otomatis oleh pip install didalam docker ketika docker build)
 - ### repo ini berisi folder screenshots didalam screenshots/
-- ### repo ini berisi dokumentasi model data di sourcecode/dbt_nyc_taxi/target (http://127.0.0.1:8083)
+- ### repo ini berisi dokumentasi model data di [dokumentasi-model-dbt](https://github.com/imakin/dbt-airflow/tree/main/dokumentasi-model-dbt) yang merupakan kopi dari sourcecode/dbt_nyc_taxi/target yang akan tergenerasi bila `dbt docs generate` atau pipeline dijalankan ( dapat di akses di http://127.0.0.1:8083)
